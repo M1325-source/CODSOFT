@@ -1,2 +1,73 @@
 # CODSOFT
 internship 
+IRIS FLOWER CLASSIFICATION
+
+The Iris flower dataset consists of three species: setosa, versicolor,
+and virginica. These species can be distinguished based on their
+measurements. Now, imagine that you have the measurements
+of Iris flowers categorized by their respective species. Your
+objective is to train a machine learning model that can learn from
+these measurements and accurately classify the Iris flowers into
+their respective species.
+
+Use the Iris dataset to develop a model that can classify iris
+flowers into different species based on their sepal and petal
+measurements. This dataset is widely used for introductory
+classification tasks.
+
+
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression, LinearRegression
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Load the dataset
+iris_df = pd.read_csv('IRIS.csv')
+
+# Display the first few rows of the dataset
+print(iris_df.head())
+
+# Visualize the data
+sns.pairplot(iris_df, hue='species')
+plt.show()
+
+# Extract features and target variable
+X = iris_df.drop('species', axis=1)
+y = iris_df['species']
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# Standardize the features
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# Train a logistic regression model
+log_reg = LogisticRegression(max_iter=200)
+log_reg.fit(X_train_scaled, y_train)
+
+# Make predictions
+y_pred_log_reg = log_reg.predict(X_test_scaled)
+
+# Evaluate the logistic regression model
+accuracy_log_reg = accuracy_score(y_test, y_pred_log_reg)
+print(f'Logistic Regression Accuracy: {accuracy_log_reg:.2f}')
+
+print('Logistic Regression Classification Report:')
+print(classification_report(y_test, y_pred_log_reg))
+
+print('Logistic Regression Confusion Matrix:')
+print(confusion_matrix(y_test, y_pred_log_reg))
+
+# Plot confusion matrix for logistic regression
+plt.figure(figsize=(10, 5))
+plt.subplot(1, 2, 1)
+sns.heatmap(confusion_matrix(y_test, y_pred_log_reg), annot=True, fmt='d', cmap='Blues')
+plt.title('Logistic Regression Confusion Matrix')
+plt.tight_layout()
+plt.show()
