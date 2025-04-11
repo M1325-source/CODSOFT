@@ -6,39 +6,65 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report, confusion_matrix
 from imblearn.over_sampling import SMOTE
-from imblearn.under_sampling import RandomUnderSampler
-from imblearn.combine import SMOTEENN
+import matplotlib.pyplot as plt
+import seaborn as sns
 
-data=pd.read_csv('cre')
-data.head()
+# Load the dataset
+data = pd.read_csv('creditcard.csv')  # Replace with your dataset path
 
-data.isnull().sum()
+# Preview the data
+print(data.head())
 
-data=data.drona()
-X=data.drop('Class', axis=1)
-Y=data['Class']
+# Check for missing values
+print(data.isnull().sum())
 
-scaler=StandardScaler()
-X_scaled=scaler.fit_transform(X)
+# Drop any rows with missing values (if any)
+data = data.dropna()
 
+# Separate features and target
+X = data.drop('Class', axis=1)
+Y = data['Class']
+
+# Visualize class distribution
+sns.countplot(x=Y)
+plt.title("Class Distribution Before Resampling")
+plt.show()
+
+# Scale the features
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# Print original class distribution
+print("Original class distribution:")
 print(Y.value_counts())
 
-smote=SMOTE()
-X_res, y_res=smote.fit_resample(X_scaled, Y)
-X_train, X_test, Y_train, Y_test=train_test_split(X_res, y_res, test_size=0.3, random_state=42)
+# Apply SMOTE to handle class imbalance
+smote = SMOTE(random_state=42)
+X_res, y_res = smote.fit_resample(X_scaled, Y)
 
-logreg=LogisticRegression()
+# Print new class distribution
+print("After SMOTE Resampling:")
+print(pd.Series(y_res).value_counts())
+
+# Train-test split
+X_train, X_test, Y_train, Y_test = train_test_split(X_res, y_res, test_size=0.3, random_state=42)
+
+# Logistic Regression Model
+logreg = LogisticRegression(max_iter=1000)
 logreg.fit(X_train, Y_train)
-Y_pred_logreg=logreg.predict(X_test)
+Y_pred_logreg = logreg.predict(X_test)
 
-rf=RandomForestClassifier()
+# Random Forest Model
+rf = RandomForestClassifier(random_state=42)
 rf.fit(X_train, Y_train)
-Y_pred_rf=rf.predict(X_test)
+Y_pred_rf = rf.predict(X_test)
 
-print("Logistic Regression:")
+# Evaluation for Logistic Regression
+print("\nLogistic Regression:")
 print(classification_report(Y_test, Y_pred_logreg))
-print(confusion_matrix(Y_test, Y_pred_logreg))
+print("Confusion Matrix:\n", confusion_matrix(Y_test, Y_pred_logreg))
 
-print("Random Forest:")
+# Evaluation for Random Forest
+print("\nRandom Forest:")
 print(classification_report(Y_test, Y_pred_rf))
-print(confusion_matrix(Y_test, Y_pred_rf))
+print("Confusion Matrix:\n", confusion_matrix(Y_test, Y_pred_rf))
